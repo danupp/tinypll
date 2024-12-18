@@ -28,7 +28,8 @@ fref = external reference frequency
 //#define FTW 834491733
 //#define FTW 819636907  9.38
 //#define FTW 828375040  // 9.48 MHz at 256 div and 19.2 MHz
-#define FTW 671088640  // 12.5 kHz -> 12.8 MHz at 1024 div
+//#define FTW 671088640  // 12.5 kHz -> 12.8 MHz at 1024 div
+#define FTW 1006632960  // 19.2e6/1024 at 10/125 MHz
 
 uint32_t nco_reg;
 uint8_t cosval;
@@ -134,15 +135,14 @@ void main () {
   CCL.LUT0CTRLA = 0b00001001; // enable with outen
   //CCL.LUT0CTRLA = 0b00000001; // enable
   CCL.CTRLA = 0x01;
-  
-  PORTA.DIR &= ~PIN2_bm;
 
   PORTB.OUT |= OPAMP_ENABLE;
 
   // Wide loop
-  //EVSYS.ASYNCCH1 = 0x01; // CCL LUT0
-  //EVSYS.ASYNCUSER8 = 0x04; // ch1 to EVOUT0/PA2
-  //PORTMUX.CTRLA |= 0x01; // enable EVOUT0
+  PORTA.DIR |= PIN2_bm;
+  EVSYS.ASYNCCH1 = 0x01; // CCL LUT0
+  EVSYS.ASYNCUSER8 = 0x04; // ch1 to EVOUT0/PA2
+  PORTMUX.CTRLA |= 0x01; // enable EVOUT0
 
   _delay_us(10);
 
@@ -155,9 +155,6 @@ void main () {
     wdr();
   }
   cli(); 
-
-  
-   
   
   // Now narrow loop
   //PORTMUX.CTRLA &= ~0x01; // disable EVOUT0
@@ -170,7 +167,7 @@ void main () {
   sei();
   
   while(1) {
-    _delay_ms(10);
+    //_delay_ms(10);
     wdr();
   }
   
