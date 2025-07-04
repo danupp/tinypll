@@ -1,0 +1,3 @@
+#!/bin/bash
+
+~/devel/avr/toolchain/pyupdi/pyupdi.py -d tiny414 -c /dev/ttyUSB0 -f tinypll.hex
