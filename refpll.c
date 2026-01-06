@@ -45,7 +45,14 @@ uint8_t refpll_start (uint32_t freq_VCXO ) {
   USART_Transmit_String(buffer);
 #endif
 
-  if (RTC.CNT > 100 && RTC.CNT < 135) {
+  if (RTC.CNT > 50 && RTC.CNT < 70) {
+    freq_ref_kHz = 5000;
+    USART_Transmit_String("Ref at 5 MHz found.\n");
+    cpudiv = 0x00; // 1
+    timer_top = (uint16_t)0x0090; // 5e6/(0x90+1) = 34.482.. kHz
+    factor = 124554.051584; // 2^32/(5e6/(0x90+1))
+   }
+  else if (RTC.CNT > 100 && RTC.CNT < 135) {
     freq_ref_kHz = 10000;
     USART_Transmit_String("Ref at 10 MHz found.\n");
     cpudiv = 0x00; // 1
@@ -100,28 +107,58 @@ uint8_t refpll_start (uint32_t freq_VCXO ) {
   uint8_t PIT_DIV;
 
   if ((freq_VCXO > 5000000) && (freq_VCXO <= 10000000)) {
-    div_vcxo=512;
-    PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV512_gc;
+    if (freq_ref_kHz == 5000 ) {
+      div_vcxo=1024;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV1024_gc;
+    }
+    else {
+      div_vcxo=512;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV512_gc;
+    }
   }
   else if ((freq_VCXO > 10000000) && (freq_VCXO <= 23000000)) {
-    div_vcxo=1024;
-    PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV1024_gc;
+    if (freq_ref_kHz == 5000 ) {
+      div_vcxo=2048;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV2048_gc;
+    }
+    else {
+      div_vcxo=1024;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV1024_gc;
+    }
   }
   else if ((freq_VCXO > 23000000) && (freq_VCXO <= 46000000)) {
-    div_vcxo=2048;
-    PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV2048_gc;
+    if (freq_ref_kHz == 5000 ) {
+      div_vcxo=4096;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV4096_gc;
+    }
+    else {
+      div_vcxo=2048;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV2048_gc;
+    }
   }
   else if ((freq_VCXO > 46000000) && (freq_VCXO <= 92000000)) {
-    div_vcxo=4096;
-    PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV4096_gc;
+    if (freq_ref_kHz == 5000 ) {
+      div_vcxo=8192;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV8192_gc;
+    }
+    else {
+      div_vcxo=4096;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV4096_gc;
+    }
   }
   else if (freq_VCXO > 92000000) {
     div_vcxo=8192;
     PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV8192_gc;
   }
   else {
-    div_vcxo=256;
-    PIT_DIV=EVSYS_ASYNCCH3_PIT_DIV256_gc;
+    if (freq_ref_kHz == 5000 ) {
+      div_vcxo=512;
+      PIT_DIV = EVSYS_ASYNCCH3_PIT_DIV512_gc;
+    }
+    else {
+      div_vcxo=256;
+      PIT_DIV=EVSYS_ASYNCCH3_PIT_DIV256_gc;
+    }
   }
 
   FTW = (uint32_t)(round(((long double)freq_VCXO/div_vcxo)*factor));
