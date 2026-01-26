@@ -237,12 +237,13 @@ int main (void) {
        state = RUNNING;
        PORTC.OUT |= LED;
      }
-     else
+     else {
        state = NO_REFERENCE;
      
-     TCA0.SINGLE.PER = 0xaa00;
-     TCA0.SINGLE.INTCTRL = 0x01;
-     TCA0.SINGLE.CTRLA = 0x0f; // Div 1024, enable  
+       TCA0.SINGLE.PER = 0xaa00;
+       TCA0.SINGLE.INTCTRL = 0x01;
+       TCA0.SINGLE.CTRLA = 0x0f; // Div 1024, enable  
+     }
    }
 
    _PROTECTED_WRITE (WDT.CTRLA,0x09); // 2s WDT on
