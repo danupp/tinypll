@@ -47,14 +47,14 @@ uint8_t refpll_start (uint32_t freq_VCXO, uint16_t freq_ref) {
 #endif
 
   
-  if (freq_ref == 10 || (RTC.CNT > 100 && RTC.CNT < 135)) {
+  if (freq_ref == 10 || (freq_ref == 255 && (RTC.CNT > 100 && RTC.CNT < 135))) {
     //if (RTC.CNT)
     //	USART_Transmit_String("10 MHz found\n");
       cpudiv = 0x00; // 1
       timer_top = (uint16_t)0x0090; // 10e6/(0x90+1) = 68.965.. kHz
       factor = 62277.025792; // 2^32/(10e6/(0x90+1))
     }
-  else if (freq_ref == 12 || (RTC.CNT > 134  && RTC.CNT < 160)) {
+  else if (freq_ref == 12 || (freq_ref == 255 && (RTC.CNT > 134  && RTC.CNT < 160))) {
     //if (RTC.CNT)
     //	USART_Transmit_String("12 MHz found\n");
       cpudiv = 0x00; // 1
@@ -86,7 +86,7 @@ uint8_t refpll_start (uint32_t freq_VCXO, uint16_t freq_ref) {
       timer_top = (uint16_t)0x00ef; // 19.2e6/(0xef+1) = 80 kHz
       factor = 53687.091200; // 2^32/80e3 = 53687.0912
     }
-  else if (freq_ref == 20 || (RTC.CNT > 200 && RTC.CNT < 300)) {
+  else if (freq_ref == 20 || (freq_ref == 255 && (RTC.CNT > 200 && RTC.CNT < 300))) {
     //if (RTC.CNT)
     //	USART_Transmit_String("20 MHz found\n");
       cpudiv = 0x00; // 1
@@ -103,7 +103,7 @@ uint8_t refpll_start (uint32_t freq_VCXO, uint16_t freq_ref) {
       timer_top = (uint16_t)0x00ef; // 12.5e6/(0x9b+1) = 80.128... kHz
       factor = 53601.191854; // 2^32/(12.5e6/(0x9b+1)) = 53601.191854
     }
-  else if (freq_ref == 26 || (RTC.CNT > 300 && RTC.CNT < 350)) {
+  else if (freq_ref == 26 || (freq_ref == 255 && (RTC.CNT > 300 && RTC.CNT < 350))) {
     //if (RTC.CNT)
     //	USART_Transmit_String("26 MHz found\n");
       cpudiv = 0x01; // 2
@@ -125,7 +125,7 @@ uint8_t refpll_start (uint32_t freq_VCXO, uint16_t freq_ref) {
       timer_top = (uint16_t)0x00ef; // 19.2e6/(0xef+1) = 80 kHz
       factor = 53687.091200; // 2^32/80e3 = 53687.0912
     }
-  else if (freq_ref == 40 || (RTC.CNT > 430 && RTC.CNT < 520)) {
+  else if (freq_ref == 40 || (freq_ref == 255 && (RTC.CNT > 430 && RTC.CNT < 520))) {
     //if (RTC.CNT)
     //	USART_Transmit_String("40 MHz found\n");
       cpudiv = 0x01; // 2
