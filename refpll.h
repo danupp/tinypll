@@ -15,6 +15,6 @@
 
 #define wdr() __asm__ __volatile__ ("wdr")
 
-uint8_t refpll_start(uint32_t);
+uint8_t refpll_start(uint32_t, uint16_t);
 
 void refpll_stop();

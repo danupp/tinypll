@@ -1,0 +1,41 @@
+Connect TinyPLL to a PC over USB and connect using a terminal program set for 9600 baud (8 bits, no parity, 1 stop bit) to typically /dev/ttyACM0 in Linux or COMxx (see in device manager which port number it gets) in Windows.
+Then press enter and the LED on the TinyPLL board should start flashing and the configuration begins. Enter VCXO frequency (i.e. the frequency of your oscillator to be locked) and press enter. (If nothing is written and just enter is typed, the TinyPLL will leave configuartion mode and reboot) Then select a reference frequency. Either chose 0, to set the TinyPLL to detect automatically any frequency marked by *, or select another option for a fixed reference frequency. After typing enter, the device will reboot and print out its configuration at start. Here is an example of the configuration and restart:
+
+VCXO f in Hz?
+> 12800000
+
+Ref?
+1  - 10*
+2  - 12*
+3  - 12.8
+4  - 13
+5  - 14.4
+6  - 16
+7  - 19.2
+8  - 20*
+9  - 24
+10 - 25
+11 - 26*
+12 - 32
+13 - 36
+14 - 38.4
+15 - 40*
+16 - 48
+     MHz
+Or 0 for auto det of *
+> 0
+
+**
+
+***
+Press ent to conf
+VCXO 12800000 Hz
+ref auto
+No ref found
+
+If there is no reference frequency available to it, it will again restart after a few seconds until a reference is found and the PLL-functionality will start to operate. If the reference is lost at a later time, it will again restart.
+
+Additional notes:
+No frequency below 10 MHz was added to the list of possible reference frequencies. This is due to limitations in the AVR chip, which would have resulted in too low sampling frequency for the implemented DDS. 
+
+

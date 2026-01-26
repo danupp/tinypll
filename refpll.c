@@ -14,19 +14,21 @@ ISR(TCB0_INT_vect) { // ~70 kHz @ 10 MHz
   PORTA.OUT &= ~TP1;
 }
 
-uint8_t refpll_start (uint32_t freq_VCXO ) {
+uint8_t refpll_start (uint32_t freq_VCXO, uint16_t freq_ref) {
 
   uint8_t cpudiv;
-  uint16_t freq_ref_kHz = 0, timer_top;
+  uint16_t timer_top;
   long double factor;
 
 #ifdef DEBUG
   char buffer[30];
   USART_Transmit_String("Refpll.\n");
 #endif
+
+  RTC.CNT = 0;
   
   // Use RTC as counter for EXTCLOCK to determine if there is a reference frequency
-
+    
 #ifdef DEBUG
   sprintf(buffer,"Ext ref?\n", RTC.CNT);
   USART_Transmit_String(buffer);
@@ -35,61 +37,114 @@ uint8_t refpll_start (uint32_t freq_VCXO ) {
   while(RTC.STATUS);
   RTC.CLKSEL = 0x03; // Use EXTCLK
   //while(RTC.PITSTATUS);
-  RTC.CNT = 0;
   RTC.CTRLA = (0xd << 3) | 0x01; // Enable, 8192 div
   _delay_ms(100);
   RTC.CTRLA = 0x00; // stop
-  
+    
 #ifdef DEBUG
   sprintf(buffer,"RTC.CNT: %u\n", RTC.CNT);
   USART_Transmit_String(buffer);
 #endif
 
-  if (RTC.CNT > 100 && RTC.CNT < 135) {
-    freq_ref_kHz = 10000;
-    USART_Transmit_String("Ref at 10 MHz found.\n");
-    cpudiv = 0x00; // 1
-    timer_top = (uint16_t)0x0090; // 10e6/(0x90+1) = 68.965.. kHz
-    factor = 62277.025792; // 2^32/(10e6/(0x90+1))
-   }
-  else if (RTC.CNT > 134  && RTC.CNT < 160) {
-    freq_ref_kHz = 12000;
-    USART_Transmit_String("Ref at 12 MHz found.\n");
-    cpudiv = 0x00; // 1
-    timer_top = (uint16_t)0x0095; // 12e6/(0x95+1) = 80 kHz
-    factor = 53687.0912; // 2^32/80e3 = 53687.0912
+  
+  if (freq_ref == 10 || (RTC.CNT > 100 && RTC.CNT < 135)) {
+    //if (RTC.CNT)
+    //	USART_Transmit_String("10 MHz found\n");
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x0090; // 10e6/(0x90+1) = 68.965.. kHz
+      factor = 62277.025792; // 2^32/(10e6/(0x90+1))
+    }
+  else if (freq_ref == 12 || (RTC.CNT > 134  && RTC.CNT < 160)) {
+    //if (RTC.CNT)
+    //	USART_Transmit_String("12 MHz found\n");
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x0095; // 12e6/(0x95+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 128) {
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x009f; // 12.8e6/(0x9f+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 130) {
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x095; // 13e6/(0x95+1) = 86.666 kHz
+      factor = 49557.314954; // 2^32/(13e6/(0x95+1))
+    }
+  else if (freq_ref == 144) {
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x00b3; // 14.4e6/(0xb3+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 16) {
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x00c7; // 16e6/(0xc7+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 192) {
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x00ef; // 19.2e6/(0xef+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 20 || (RTC.CNT > 200 && RTC.CNT < 300)) {
+    //if (RTC.CNT)
+    //	USART_Transmit_String("20 MHz found\n");
+      cpudiv = 0x00; // 1
+      timer_top = (uint16_t)0x00f9; // 20e6/(0xf9+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 24) {
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x0095; // 12e6/(0x95+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 25) {
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x00ef; // 12.5e6/(0x9b+1) = 80.128... kHz
+      factor = 53601.191854; // 2^32/(12.5e6/(0x9b+1)) = 53601.191854
+    }
+  else if (freq_ref == 26 || (RTC.CNT > 300 && RTC.CNT < 350)) {
+    //if (RTC.CNT)
+    //	USART_Transmit_String("26 MHz found\n");
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x095; // 13e6/(0x95+1) = 86.666 kHz
+      factor = 49557.314954; // 2^32/(13e6/(0x95+1))
+    }
+  else if (freq_ref == 32) {
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x00c7; // 16e6/(0xc7+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 36) {
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x00ef; // 12.5e6/(0x9b+1) = 80.128... kHz
+      factor = 53601.191854; // 2^32/(12.5e6/(0x9b+1)) = 53601.191854
+    }
+  else if (freq_ref == 384) {
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x00ef; // 19.2e6/(0xef+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 40 || (RTC.CNT > 430 && RTC.CNT < 520)) {
+    //if (RTC.CNT)
+    //	USART_Transmit_String("40 MHz found\n");
+      cpudiv = 0x01; // 2
+      timer_top = (uint16_t)0x00f9; // 20e6/(0xf9+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
+    }
+  else if (freq_ref == 48) {
+      cpudiv = 0x03; // 4
+      timer_top = (uint16_t)0x0095; // 12e6/(0x95+1) = 80 kHz
+      factor = 53687.091200; // 2^32/80e3 = 53687.0912
   }
-  else if (RTC.CNT > 200 && RTC.CNT < 300) {
-    freq_ref_kHz = 20000;
-    USART_Transmit_String("Ref at 20 MHz found.\n");
-    cpudiv = 0x01; // 2
-    timer_top = (uint16_t)0x0090; // 10e6/(0x90+1) = 68.965.. kHz
-    factor = 62277.025792; // 2^32/(10e6/(0x90+1))
-  }
-  else if (RTC.CNT > 300 && RTC.CNT < 350) {
-    freq_ref_kHz = 26000;
-    USART_Transmit_String("Ref at 26 MHz found.\n");
-    cpudiv = 0x01; // 2
-    timer_top = (uint16_t)0x095; // 13e6/(0x95+1) = 86.666 kHz
-    factor = 49557.31450; // 2^32/(13e6/(0x95+1))
-  }
-  else if (RTC.CNT > 430 && RTC.CNT < 520) {
-    freq_ref_kHz = 40000;
-    USART_Transmit_String("Ref at 40 MHz found.\n");
-    cpudiv = 0x03; // 4
-    timer_top = (uint16_t)0x0090; // 10e6/(0x90+1) = 68.965.. kHz
-    factor = 62277.025792; // 2^32/(10e6/(0x90+1))
-  }
-  else {  // no valid ref
-    USART_Transmit_String("No valid ref found.\n");
+
+  if (RTC.CNT < 100){  // no valid ref
+    USART_Transmit_String("No ref found\n");
     return (0);
   }
 
-#ifdef DEBUG
-  //USART0.BAUD = (int16_t) 4167;  // 9600 bauds at 10 MHz
-  sprintf(buffer,"Ref detected at: %u kHz\n", freq_ref_kHz);
-  USART_Transmit_String(buffer);
-#endif
+  
+  _delay_ms(100);
   
   _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA,0x05);  // Ext on TOSC1, Enable
   
