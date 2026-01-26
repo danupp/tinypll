@@ -16,8 +16,11 @@ ISR (USART0_RXC_vect) {
     udr_rx = USART0.RXDATAL;
     USART0.TXDATAL = udr_rx;
     
-    if (udr_rx=='\n' || udr_rx=='\r') {
+    if (udr_rx=='\n') {
+    }
+    else if (udr_rx=='\r') {
       process_usart_flag = 1;
+      rx_buff[rx_ptr]='\0';
       rx_ptr=0;
     }
     else if (rx_ptr < 28) {
